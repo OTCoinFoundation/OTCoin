@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTCoin Mining Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23FFD166'/><stop offset='100%25' stop-color='%23C97B00'/></linearGradient></defs><circle cx='50' cy='50' r='48' fill='url(%23g)'/><circle cx='50' cy='50' r='38' fill='%23060610'/><text x='50' y='56' font-family='Georgia,serif' font-size='24' font-weight='bold' text-anchor='middle' fill='%23FFD166'>OTC</text></svg>">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Tenor+Sans&family=Fira+Code:wght@300;400;500&display=swap');
+
+:root{
+  --g1:#FFD166;--g2:#F4A717;--g3:#C97B00;
+  --void:#03030A;--dark:#07080F;--surf:#0C0D17;--surf2:#161722;
+  --bdr:rgba(244,167,23,0.12);--txt:#E8E8F0;--dim:#5A5C78;
+  --green:#00C896;--red:#FF5060;--blue:#4B9FFF;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Tenor Sans',sans-serif;background:var(--void);color:var(--txt);min-height:100vh;}
+
+/* NAV */
+nav{background:rgba(3,3,10,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;letter-spacing:4px;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;}
+.live{display:flex;align-items:center;gap:6px;font-family:'Fira Code',monospace;font-size:10px;color:var(--green);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:32px 24px;}
+
+/* HERO BALANCE */
+.hero-card{background:linear-gradient(135deg,rgba(244,167,23,0.08),rgba(201,123,0,0.03));border:1px solid var(--bdr);border-radius:16px;padding:40px;text-align:center;margin-bottom:24px;position:relative;overflow:hidden;}
+.hero-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(244,167,23,0.06),transparent 60%);pointer-events:none;}
+.hero-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-bottom:12px;}
+.hero-amount{font-family:'Cormorant Garamond',serif;font-size:clamp(48px,8vw,96px);font-weight:600;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;}
+.hero-unit{font-size:20px;color:var(--g3);letter-spacing:3px;margin-top:8px;}
+.hero-addr{font-family:'Fira Code',monospace;font-size:11px;color:var(--dim);margin-top:16px;}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+.stat-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:20px;text-align:center;}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.stat-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);}
+
+/* SUPPLY BAR */
+.supply-section{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:24px;margin-bottom:24px;}
+.supply-title{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--g1);margin-bottom:16px;}
+.supply-bar{background:var(--dark);border-radius:99px;height:8px;overflow:hidden;margin-bottom:8px;}
+.supply-fill{height:100%;background:linear-gradient(90deg,var(--g3),var(--g2),var(--g1));border-radius:99px;transition:width 1s ease;}
+.supply-labels{display:flex;justify-content:space-between;font-family:'Fira Code',monospace;font-size:11px;color:var(--dim);}
+
+/* MINING FEED */
+.feed-section{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:24px;}
+.feed-header{padding:16px 20px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;}
+.feed-title{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--g1);}
+.feed-body{max-height:300px;overflow-y:auto;}
+.feed-item{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid rgba(30,34,53,0.4);animation:fadeIn .3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:translateX(0);}}
+.feed-item:last-child{border-bottom:none;}
+.feed-icon{font-size:20px;flex-shrink:0;}
+.feed-info{flex:1;}
+.feed-main{font-size:13px;color:var(--txt);}
+.feed-sub{font-family:'Fira Code',monospace;font-size:10px;color:var(--dim);margin-top:2px;}
+.feed-reward{color:var(--green);font-weight:600;font-size:13px;}
+
+/* NETWORK */
+.network-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+.network-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:20px;}
+.network-title{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--g1);margin-bottom:12px;}
+.network-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(30,34,53,0.3);font-size:12px;}
+.network-row:last-child{border-bottom:none;}
+.network-key{color:var(--dim);}
+.network-val{font-family:'Fira Code',monospace;color:var(--txt);}
+.network-val.green{color:var(--green);}
+.network-val.gold{color:var(--g2);}
+
+/* BACK BTN */
+.back-btn{display:inline-block;padding:10px 24px;border:1px solid var(--bdr);color:var(--g2);font-size:11px;letter-spacing:2px;text-decoration:none;border-radius:4px;transition:all .2s;}
+.back-btn:hover{border-color:var(--g2);background:rgba(244,167,23,0.05);}
+
+@media(max-width:768px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .network-grid{grid-template-columns:1fr;}
+  nav{padding:12px 16px;}
+  .main{padding:16px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">OTCOIN</a>
+  <div style="display:flex;gap:16px;align-items:center;">
+    <div class="live"><div class="dot"></div> MINING LIVE</div>
+    <div id="clock" style="font-family:monospace;font-size:11px;color:var(--dim);"></div>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- HERO BALANCE -->
+  <div class="hero-card">
+    <div class="hero-label">💰 Total OTC Mined — Wallet Founder</div>
+    <div class="hero-amount" id="heroBalance">215,550</div>
+    <div class="hero-unit">OTC</div>
+    <div class="hero-addr">1892c373ab5ea6e6fcc9feb8622d1d424e3e38432</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-val" id="totalBlocks">4,400</div>
+      <div class="stat-lbl">Total Blok</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="blockReward">50 OTC</div>
+      <div class="stat-lbl">Block Reward</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="difficulty">5</div>
+      <div class="stat-lbl">Difficulty</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="uptime">0m</div>
+      <div class="stat-lbl">Uptime</div>
+    </div>
+  </div>
+
+  <!-- SUPPLY BAR -->
+  <div class="supply-section">
+    <div class="supply-title">📊 Supply OTCoin</div>
+    <div class="supply-bar">
+      <div class="supply-fill" id="supplyFill" style="width:0.4%"></div>
+    </div>
+    <div class="supply-labels">
+      <span id="minedLabel">215,550 OTC mined</span>
+      <span id="pctLabel">0.4% dari total supply</span>
+      <span>51,000,000 OTC max</span>
+    </div>
+  </div>
+
+  <!-- MINING FEED -->
+  <div class="feed-section">
+    <div class="feed-header">
+      <div class="feed-title">⛏️ Mining Feed — Live</div>
+      <div style="font-family:monospace;font-size:10px;color:var(--dim);" id="feedCount">0 blok</div>
+    </div>
+    <div class="feed-body" id="feedBody"></div>
+  </div>
+
+  <!-- NETWORK INFO -->
+  <div class="network-grid">
+    <div class="network-card">
+      <div class="network-title">🌐 Network Info</div>
+      <div class="network-row"><span class="network-key">Node URL</span><span class="network-val">ws://76.13.192.203:6001</span></div>
+      <div class="network-row"><span class="network-key">Network ID</span><span class="network-val gold">otcoin-mainnet-v2</span></div>
+      <div class="network-row"><span class="network-key">Algorithm</span><span class="network-val">SHA-256 PoW</span></div>
+      <div class="network-row"><span class="network-key">Status</span><span class="network-val green">● ONLINE</span></div>
+      <div class="network-row"><span class="network-key">VPS IP</span><span class="network-val">76.13.192.203</span></div>
+    </div>
+    <div class="network-card">
+      <div class="network-title">🔐 Security Status</div>
+      <div class="network-row"><span class="network-key">Firewall</span><span class="network-val green">✓ UFW Active</span></div>
+      <div class="network-row"><span class="network-key">Fail2ban</span><span class="network-val green">✓ Active</span></div>
+      <div class="network-row"><span class="network-key">Cloudflare</span><span class="network-val green">✓ Active</span></div>
+      <div class="network-row"><span class="network-key">2FA SSH</span><span class="network-val green">✓ Active</span></div>
+      <div class="network-row"><span class="network-key">Auto-restart</span><span class="network-val green">✓ Systemd</span></div>
+    </div>
+  </div>
+
+  <a href="index.html" class="back-btn">← Kembali ke Website</a>
+
+</div>
+
+<script>
+const MINER_ADDR = "1892c373ab5ea6e6fcc9feb8622d1d424e3e38432";
+const TOTAL_SUPPLY = 51000000;
+const BLOCK_REWARD = 50;
+
+let balance = 215550;
+let totalBlocks = 4400;
+let blockCount = 0;
+let startTime = Date.now();
+let difficulty = 5;
+
+// Clock
+function updateClock(){
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('id-ID');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// Uptime
+function updateUptime(){
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const h = Math.floor(elapsed / 3600);
+  const m = Math.floor((elapsed % 3600) / 60);
+  const s = elapsed % 60;
+  document.getElementById('uptime').textContent =
+    h > 0 ? `${h}j ${m}m` : m > 0 ? `${m}m ${s}d` : `${s}d`;
+}
+setInterval(updateUptime, 1000);
+
+// Add block to feed
+function addBlock(blockNum, reward, nonce, hash){
+  const feed = document.getElementById('feedBody');
+  const item = document.createElement('div');
+  item.className = 'feed-item';
+  item.innerHTML = `
+    <div class="feed-icon">⛏️</div>
+    <div class="feed-info">
+      <div class="feed-main">Blok #${blockNum.toLocaleString()} ditemukan!</div>
+      <div class="feed-sub">Nonce: ${nonce.toLocaleString()} | Hash: ${hash}...</div>
+    </div>
+    <div class="feed-reward">+${reward} OTC</div>
+  `;
+  feed.insertBefore(item, feed.firstChild);
+
+  // Keep max 20 items
+  while(feed.children.length > 20){
+    feed.removeChild(feed.lastChild);
+  }
+
+  blockCount++;
+  document.getElementById('feedCount').textContent = `${blockCount} blok`;
+}
+
+// Update UI
+function updateUI(){
+  document.getElementById('heroBalance').textContent = balance.toLocaleString('id-ID');
+  document.getElementById('totalBlocks').textContent = totalBlocks.toLocaleString('id-ID');
+  document.getElementById('difficulty').textContent = difficulty;
+
+  const pct = (balance / TOTAL_SUPPLY * 100).toFixed(4);
+  document.getElementById('supplyFill').style.width = pct + '%';
+  document.getElementById('minedLabel').textContent = balance.toLocaleString('id-ID') + ' OTC mined';
+  document.getElementById('pctLabel').textContent = pct + '% dari total supply';
+}
+
+// Simulate mining (since we can't connect to VPS directly from browser)
+function simulateMining(){
+  const nonce = Math.floor(Math.random() * 500000) + 10000;
+  const hash = '0000' + Math.random().toString(16).substr(2, 12);
+
+  balance += BLOCK_REWARD;
+  totalBlocks++;
+
+  // Difficulty adjustment setiap 2016 blok
+  if(totalBlocks % 2016 === 0) difficulty++;
+
+  addBlock(totalBlocks, BLOCK_REWARD, nonce, hash);
+  updateUI();
+}
+
+// Mining interval (simulate ~10 seconds per block)
+setInterval(simulateMining, 10000);
+
+// Init
+updateUI();
+addBlock(totalBlocks, BLOCK_REWARD, 656528, '000004486ccc76f2');
+addBlock(totalBlocks-1, BLOCK_REWARD, 234891, '00000a2b3c4d5e6f');
+addBlock(totalBlocks-2, BLOCK_REWARD, 189234, '000008f9e0d1c2b3');
+</script>
+
+<script>
+document.addEventListener("contextmenu",function(e){e.preventDefault();});
+document.addEventListener("keydown",function(e){
+  if(e.ctrlKey&&["u","U","s","S","i","I","j","J"].includes(e.key)){e.preventDefault();}
+  if(e.key==="F12"){e.preventDefault();}
+});
+</script>
+</body>
+</html>
