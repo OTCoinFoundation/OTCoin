@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTCoin Block Explorer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Tenor+Sans&family=Fira+Code:wght@300;400;500&display=swap');
+
+:root{
+  --g1:#FFD166;--g2:#F4A717;--g3:#C97B00;
+  --void:#03030A;--dark:#07080F;--surf:#0C0D17;--surf2:#161722;
+  --bdr:rgba(244,167,23,0.12);--txt:#E8E8F0;--dim:#5A5C78;
+  --green:#00C896;--red:#FF5060;--blue:#4B9FFF;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Tenor Sans',sans-serif;background:var(--void);color:var(--txt);min-height:100vh;}
+
+/* NAV */
+nav{background:rgba(3,3,10,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;letter-spacing:4px;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo span{font-size:11px;font-weight:300;color:var(--dim);letter-spacing:2px;display:block;font-family:'Fira Code',monospace;}
+.nav-links{display:flex;gap:8px;}
+.nav-link{padding:8px 16px;border-radius:4px;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid transparent;color:var(--dim);}
+.nav-link:hover,.nav-link.active{color:var(--g2);border-color:var(--bdr);background:rgba(244,167,23,0.05);}
+
+/* SEARCH */
+.search-wrap{background:var(--surf);border-bottom:1px solid var(--bdr);padding:20px 40px;}
+.search-box{display:flex;gap:8px;max-width:700px;margin:0 auto;}
+.search-input{flex:1;background:var(--dark);border:1px solid var(--bdr);border-radius:4px;padding:12px 16px;color:var(--txt);font-family:'Fira Code',monospace;font-size:13px;outline:none;transition:border-color .2s;}
+.search-input:focus{border-color:var(--g2);}
+.search-input::placeholder{color:var(--dim);}
+.search-btn{padding:12px 24px;background:linear-gradient(135deg,var(--g2),var(--g3));border:none;color:#000;font-weight:700;font-size:12px;letter-spacing:2px;border-radius:4px;cursor:pointer;transition:all .2s;}
+.search-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(244,167,23,0.3);}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:32px 40px;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;}
+.stat-card{background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:20px;text-align:center;transition:border-color .3s;}
+.stat-card:hover{border-color:rgba(244,167,23,0.3);}
+.stat-val{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.stat-lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);}
+
+/* SECTION */
+.section{margin-bottom:32px;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--g1);}
+.section-tag{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:3px;color:var(--dim);}
+
+/* TABLE */
+.table{width:100%;border-collapse:collapse;background:var(--surf);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;}
+.table th{padding:12px 16px;text-align:left;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--bdr);background:var(--dark);}
+.table td{padding:12px 16px;border-bottom:1px solid rgba(30,34,53,0.5);font-family:'Fira Code',monospace;font-size:12px;}
+.table tr:last-child td{border-bottom:none;}
+.table tr:hover td{background:var(--surf2);}
+
+.hash{color:var(--g2);cursor:pointer;}
+.hash:hover{text-decoration:underline;}
+.badge{display:inline-block;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:600;}
+.badge-green{background:rgba(0,200,150,0.1);color:var(--green);border:1px solid rgba(0,200,150,0.2);}
+.badge-gold{background:rgba(244,167,23,0.1);color:var(--g2);border:1px solid rgba(244,167,23,0.2);}
+.badge-blue{background:rgba(75,159,255,0.1);color:var(--blue);border:1px solid rgba(75,159,255,0.2);}
+
+/* BLOCK DETAIL */
+.detail-card{background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:24px;margin-bottom:16px;display:none;}
+.detail-card.show{display:block;}
+.detail-row{display:flex;padding:10px 0;border-bottom:1px solid rgba(30,34,53,0.5);}
+.detail-row:last-child{border-bottom:none;}
+.detail-key{width:180px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);flex-shrink:0;}
+.detail-val{font-family:'Fira Code',monospace;font-size:12px;color:var(--txt);word-break:break-all;}
+
+/* LIVE INDICATOR */
+.live{display:flex;align-items:center;gap:6px;font-family:'Fira Code',monospace;font-size:10px;color:var(--green);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+
+/* PROGRESS */
+.supply-bar{background:var(--dark);border:1px solid var(--bdr);border-radius:99px;height:6px;overflow:hidden;margin-top:8px;}
+.supply-fill{height:100%;background:linear-gradient(90deg,var(--g3),var(--g2),var(--g1));border-radius:99px;transition:width .5s ease;}
+
+/* TX FLOW */
+.tx-flow{display:flex;align-items:center;gap:8px;}
+.tx-addr{color:var(--g2);font-family:'Fira Code',monospace;font-size:11px;}
+.tx-arrow{color:var(--dim);}
+.tx-amount{color:var(--green);font-weight:600;}
+
+@media(max-width:768px){
+  nav{padding:12px 16px;}
+  .main{padding:16px;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .search-wrap{padding:16px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    OTCOIN
+    <span>Block Explorer</span>
+  </div>
+  <div class="nav-links">
+    <div class="nav-link active" onclick="showTab('blocks')">Blocks</div>
+    <div class="nav-link" onclick="showTab('txs')">Transactions</div>
+    <div class="nav-link" onclick="showTab('miners')">Miners</div>
+  </div>
+  <div class="live"><div class="live-dot"></div> LIVE</div>
+</nav>
+
+<!-- SEARCH -->
+<div class="search-wrap">
+  <div class="search-box">
+    <input class="search-input" id="searchInput" placeholder="Search by block hash, address, or transaction ID..." />
+    <button class="search-btn" onclick="search()">SEARCH</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-val" id="totalBlocks">0</div>
+      <div class="stat-lbl">Total Blocks</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="totalMined">0</div>
+      <div class="stat-lbl">OTC Mined</div>
+      <div class="supply-bar"><div class="supply-fill" id="supplyFill" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="totalTxs">0</div>
+      <div class="stat-lbl">Transactions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="difficulty">4</div>
+      <div class="stat-lbl">Difficulty</div>
+    </div>
+  </div>
+
+  <!-- BLOCK DETAIL -->
+  <div class="detail-card" id="blockDetail">
+    <div class="section-head">
+      <div class="section-title">Block Detail</div>
+      <button onclick="closeDetail()" style="background:none;border:1px solid var(--bdr);color:var(--dim);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px;">✕ Close</button>
+    </div>
+    <div id="detailContent"></div>
+  </div>
+
+  <!-- BLOCKS TAB -->
+  <div id="blocksTab" class="section">
+    <div class="section-head">
+      <div class="section-title">Latest Blocks</div>
+      <div class="section-tag">// otcoin network</div>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Block</th>
+          <th>Hash</th>
+          <th>Transactions</th>
+          <th>Miner</th>
+          <th>Reward</th>
+          <th>Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="blocksBody"></tbody>
+    </table>
+  </div>
+
+  <!-- TXS TAB -->
+  <div id="txsTab" class="section" style="display:none;">
+    <div class="section-head">
+      <div class="section-title">Latest Transactions</div>
+      <div class="section-tag">// all transactions</div>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>TX Hash</th>
+          <th>From → To</th>
+          <th>Amount</th>
+          <th>Block</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody id="txsBody"></tbody>
+    </table>
+  </div>
+
+  <!-- MINERS TAB -->
+  <div id="minersTab" class="section" style="display:none;">
+    <div class="section-head">
+      <div class="section-title">Top Miners</div>
+      <div class="section-tag">// mining leaderboard</div>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Miner Address</th>
+          <th>Blocks Mined</th>
+          <th>Total Earned</th>
+          <th>Share</th>
+        </tr>
+      </thead>
+      <tbody id="minersBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+// ── SIMULATED BLOCKCHAIN DATA ──────────────────
+const MINER = "1892c373ab5ea6e6fcc9feb8622d1d424e3e38432";
+const TOTAL_SUPPLY = 51000000;
+
+function randHash(len=64){
+  const chars='0123456789abcdef';
+  let h='';for(let i=0;i<len;i++)h+=chars[Math.floor(Math.random()*16)];
+  return h;
+}
+
+function shortAddr(addr){ return addr.slice(0,8)+'...'+addr.slice(-6); }
+
+function timeAgo(seconds){
+  if(seconds<60) return seconds+'s ago';
+  if(seconds<3600) return Math.floor(seconds/60)+'m ago';
+  return Math.floor(seconds/3600)+'h ago';
+}
+
+// Generate blockchain data
+let blocks = [];
+let allTxs = [];
+let totalMined = 0;
+
+function generateBlocks(count=20){
+  blocks=[];allTxs=[];totalMined=0;
+  let prevHash='0'.repeat(64);
+  let ts = Date.now()/1000 - count*12;
+
+  for(let i=0;i<count;i++){
+    const hash='0000'+randHash(60);
+    const numTx = Math.floor(Math.random()*4)+1;
+    const txs=[];
+
+    // Coinbase
+    const reward=50;
+    totalMined+=reward;
+    const coinbaseTx={
+      hash:randHash(16),sender:'SYSTEM',
+      recipient:MINER,amount:reward,
+      type:'COINBASE',block:i
+    };
+    txs.push(coinbaseTx);
+    allTxs.push(coinbaseTx);
+
+    // Regular txs
+    for(let j=1;j<numTx;j++){
+      const tx={
+        hash:randHash(16),
+        sender:randHash(32),
+        recipient:randHash(32),
+        amount:Math.floor(Math.random()*100)+1,
+        type:'TRANSFER',block:i
+      };
+      txs.push(tx);
+      allTxs.push(tx);
+    }
+
+    blocks.push({
+      index:i, hash, prevHash,
+      txs, miner:MINER,
+      reward, nonce:Math.floor(Math.random()*200000),
+      timestamp:ts, difficulty:4
+    });
+    prevHash=hash;
+    ts+=Math.random()*20+5;
+  }
+}
+
+// ── RENDER ─────────────────────────────────────
+function renderStats(){
+  const pct=(totalMined/TOTAL_SUPPLY*100).toFixed(4);
+  document.getElementById('totalBlocks').textContent=blocks.length.toLocaleString();
+  document.getElementById('totalMined').textContent=totalMined.toLocaleString()+' OTC';
+  document.getElementById('totalTxs').textContent=allTxs.length.toLocaleString();
+  document.getElementById('supplyFill').style.width=pct+'%';
+}
+
+function renderBlocks(){
+  const now=Date.now()/1000;
+  const tbody=document.getElementById('blocksBody');
+  tbody.innerHTML='';
+  [...blocks].reverse().forEach(b=>{
+    const age=Math.floor(now-b.timestamp);
+    tbody.innerHTML+=`
+      <tr>
+        <td><span class="hash" onclick="showBlock(${b.index})">#${b.index}</span></td>
+        <td><span class="hash" onclick="showBlock(${b.index})">${b.hash.slice(0,16)}...</span></td>
+        <td>${b.txs.length}</td>
+        <td><span class="hash">${shortAddr(b.miner)}</span></td>
+        <td><span class="badge badge-gold">Ꞵ${b.reward} OTC</span></td>
+        <td>${timeAgo(age)}</td>
+        <td><span class="badge badge-green">✓ Confirmed</span></td>
+      </tr>`;
+  });
+}
+
+function renderTxs(){
+  const tbody=document.getElementById('txsBody');
+  tbody.innerHTML='';
+  [...allTxs].reverse().slice(0,30).forEach(tx=>{
+    const isCb=tx.type==='COINBASE';
+    tbody.innerHTML+=`
+      <tr>
+        <td><span class="hash">${tx.hash.slice(0,12)}...</span></td>
+        <td>
+          <div class="tx-flow">
+            <span class="tx-addr">${isCb?'SYSTEM':tx.sender.slice(0,8)+'...'}</span>
+            <span class="tx-arrow">→</span>
+            <span class="tx-addr">${tx.recipient.slice(0,8)}...</span>
+          </div>
+        </td>
+        <td><span class="tx-amount">Ꞵ${tx.amount} OTC</span></td>
+        <td><span class="hash">#${tx.block}</span></td>
+        <td><span class="badge ${isCb?'badge-gold':'badge-blue'}">${tx.type}</span></td>
+      </tr>`;
+  });
+}
+
+function renderMiners(){
+  // Count miner stats
+  const minerStats={};
+  blocks.forEach(b=>{
+    if(!minerStats[b.miner])minerStats[b.miner]={blocks:0,earned:0};
+    minerStats[b.miner].blocks++;
+    minerStats[b.miner].earned+=b.reward;
+  });
+  const sorted=Object.entries(minerStats).sort((a,b)=>b[1].blocks-a[1].blocks);
+  const tbody=document.getElementById('minersBody');
+  tbody.innerHTML='';
+  sorted.forEach(([addr,stats],i)=>{
+    const share=(stats.blocks/blocks.length*100).toFixed(1);
+    tbody.innerHTML+=`
+      <tr>
+        <td>#${i+1}</td>
+        <td><span class="hash">${shortAddr(addr)}</span></td>
+        <td>${stats.blocks}</td>
+        <td><span class="tx-amount">Ꞵ${stats.earned.toLocaleString()} OTC</span></td>
+        <td>${share}%</td>
+      </tr>`;
+  });
+}
+
+// ── BLOCK DETAIL ──────────────────────────────
+function showBlock(index){
+  const b=blocks[index];
+  const card=document.getElementById('blockDetail');
+  const content=document.getElementById('detailContent');
+  const age=Math.floor(Date.now()/1000-b.timestamp);
+
+  content.innerHTML=`
+    <div class="detail-row"><div class="detail-key">Block Height</div><div class="detail-val">#${b.index}</div></div>
+    <div class="detail-row"><div class="detail-key">Hash</div><div class="detail-val">${b.hash}</div></div>
+    <div class="detail-row"><div class="detail-key">Previous Hash</div><div class="detail-val">${b.prevHash.slice(0,32)}...</div></div>
+    <div class="detail-row"><div class="detail-key">Miner</div><div class="detail-val">${b.miner}</div></div>
+    <div class="detail-row"><div class="detail-key">Reward</div><div class="detail-val">Ꞵ${b.reward} OTC</div></div>
+    <div class="detail-row"><div class="detail-key">Nonce</div><div class="detail-val">${b.nonce.toLocaleString()}</div></div>
+    <div class="detail-row"><div class="detail-key">Difficulty</div><div class="detail-val">${b.difficulty}</div></div>
+    <div class="detail-row"><div class="detail-key">Transactions</div><div class="detail-val">${b.txs.length}</div></div>
+    <div class="detail-row"><div class="detail-key">Time</div><div class="detail-val">${timeAgo(age)}</div></div>
+    <div class="detail-row"><div class="detail-key">Status</div><div class="detail-val"><span class="badge badge-green">✓ Confirmed</span></div></div>
+  `;
+  card.classList.add('show');
+  card.scrollIntoView({behavior:'smooth'});
+}
+
+function closeDetail(){
+  document.getElementById('blockDetail').classList.remove('show');
+}
+
+// ── TABS ──────────────────────────────────────
+function showTab(tab){
+  ['blocks','txs','miners'].forEach(t=>{
+    document.getElementById(t+'Tab').style.display=tab===t?'block':'none';
+  });
+  document.querySelectorAll('.nav-link').forEach((el,i)=>{
+    el.classList.toggle('active',['blocks','txs','miners'][i]===tab);
+  });
+}
+
+// ── SEARCH ────────────────────────────────────
+function search(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  if(!q)return;
+
+  // Search blocks
+  const block=blocks.find(b=>b.hash.includes(q)||b.index.toString()===q);
+  if(block){showBlock(block.index);return;}
+
+  alert('Not found: '+q);
+}
+
+document.getElementById('searchInput').addEventListener('keypress',e=>{
+  if(e.key==='Enter')search();
+});
+
+// ── LIVE UPDATE ───────────────────────────────
+function addNewBlock(){
+  const last=blocks[blocks.length-1];
+  const hash='0000'+randHash(60);
+  const reward=50;
+  totalMined+=reward;
+
+  const coinbaseTx={
+    hash:randHash(16),sender:'SYSTEM',
+    recipient:MINER,amount:reward,
+    type:'COINBASE',block:last.index+1
+  };
+
+  blocks.push({
+    index:last.index+1, hash,
+    prevHash:last.hash,
+    txs:[coinbaseTx],
+    miner:MINER, reward,
+    nonce:Math.floor(Math.random()*200000),
+    timestamp:Date.now()/1000,
+    difficulty:4
+  });
+  allTxs.push(coinbaseTx);
+
+  renderStats();
+  renderBlocks();
+  renderTxs();
+}
+
+// ── INIT ──────────────────────────────────────
+generateBlocks(20);
+renderStats();
+renderBlocks();
+renderTxs();
+renderMiners();
+
+// Auto update setiap 10 detik
+setInterval(addNewBlock, 10000);
+</script>
+</body>
+</html>
