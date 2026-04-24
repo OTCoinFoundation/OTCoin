@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23FFD166'/><stop offset='100%25' stop-color='%23C97B00'/></linearGradient></defs><circle cx='50' cy='50' r='48' fill='url(%23g)'/><circle cx='50' cy='50' r='38' fill='%23060610'/><text x='50' y='56' font-family='Georgia,serif' font-size='24' font-weight='bold' text-anchor='middle' fill='%23FFD166'>OTC</text></svg>">
 <title>Get Started — OTCoin</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300&family=Tenor+Sans&family=Fira+Code:wght@300;400;500&display=swap');
@@ -248,6 +249,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 56px;display:fl
     <h2>Ready to Join?</h2>
     <p>Be part of the OTCoin community. Mine OTC, build with us, and shape the future of decentralized finance.</p>
     <a href="index.html" class="btn-gold">← Back to Home</a>
+    <a href="build.html" class="btn-outline">🛠️ Build on OTCoin</a>
     <a href="mailto:foundation@otcoin.org" class="btn-outline">Contact Us</a>
   </div>
 
@@ -261,6 +263,16 @@ function copyText(text, btn) {
     setTimeout(() => btn.textContent = orig, 2000);
   });
 }
+</script>
+<script>
+document.addEventListener("contextmenu",function(e){e.preventDefault();});
+document.addEventListener("keydown",function(e){
+  if(e.ctrlKey && ["u","U","s","S","i","I","j","J"].includes(e.key)){e.preventDefault();}
+  if(e.key==="F12"){e.preventDefault();}
+});
+document.addEventListener("selectstart",function(e){
+  if(e.target.tagName!=="INPUT"&&e.target.tagName!=="TEXTAREA"){e.preventDefault();}
+});
 </script>
 </body>
 </html>
