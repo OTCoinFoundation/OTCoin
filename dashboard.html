@@ -176,8 +176,8 @@ const MINER_ADDR = "1892c373ab5ea6e6fcc9feb8622d1d424e3e38432";
 const TOTAL_SUPPLY = 51000000;
 const BLOCK_REWARD = 50;
 
-let balance = 215550;
-let totalBlocks = 4400;
+let balance = 0;
+let totalBlocks = 0;
 let blockCount = 0;
 let startTime = Date.now();
 let difficulty = 5;
@@ -226,7 +226,7 @@ function addBlock(blockNum, reward, nonce, hash){
 
 // Update UI
 function updateUI(){
-  document.getElementById('heroBalance').textContent = balance.toLocaleString('id-ID');
+  document.getElementById('heroBalance').textContent = balance.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   document.getElementById('totalBlocks').textContent = totalBlocks.toLocaleString('id-ID');
   document.getElementById('difficulty').textContent = difficulty;
 
@@ -236,29 +236,45 @@ function updateUI(){
   document.getElementById('pctLabel').textContent = pct + '% dari total supply';
 }
 
-// Simulate mining (since we can't connect to VPS directly from browser)
-function simulateMining(){
-  const nonce = Math.floor(Math.random() * 500000) + 10000;
-  const hash = '0000' + Math.random().toString(16).substr(2, 12);
+const API = 'http://76.13.192.203:8080';
+let lastBlockIndex = 0;
 
-  balance += BLOCK_REWARD;
-  totalBlocks++;
+// Fetch real stats dari VPS
+function fetchStats(){
+  fetch(API + '/api/stats')
+    .then(r => r.json())
+    .then(d => {
+      balance = d.total_mined || 0;
+      totalBlocks = d.total_blocks || 0;
+      difficulty = d.difficulty || 5;
 
-  // Difficulty adjustment setiap 2016 blok
-  if(totalBlocks % 2016 === 0) difficulty++;
-
-  addBlock(totalBlocks, BLOCK_REWARD, nonce, hash);
-  updateUI();
+      // Cek blok baru
+      if(d.latest_index > lastBlockIndex && lastBlockIndex > 0){
+        addBlock(d.latest_index, d.block_reward, Math.floor(Math.random()*500000), d.latest_hash.slice(0,16));
+      }
+      lastBlockIndex = d.latest_index;
+      updateUI();
+    })
+    .catch(() => {});
 }
 
-// Mining interval (simulate ~10 seconds per block)
-setInterval(simulateMining, 10000);
+// Fetch balance founder
+function fetchBalance(){
+  fetch(API + '/api/balance/' + MINER_ADDR)
+    .then(r => r.json())
+    .then(d => {
+      balance = d.balance || 0;
+      updateUI();
+    })
+    .catch(() => {});
+}
 
-// Init
+// Init dan refresh setiap 10 detik
+fetchStats();
+fetchBalance();
+setInterval(fetchStats, 10000);
+setInterval(fetchBalance, 30000);
 updateUI();
-addBlock(totalBlocks, BLOCK_REWARD, 656528, '000004486ccc76f2');
-addBlock(totalBlocks-1, BLOCK_REWARD, 234891, '00000a2b3c4d5e6f');
-addBlock(totalBlocks-2, BLOCK_REWARD, 189234, '000008f9e0d1c2b3');
 </script>
 
 <script>
