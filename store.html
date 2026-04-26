@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTC Store — Tukar OTC ke Voucher Games</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23FFD166'/><stop offset='100%25' stop-color='%23C97B00'/></linearGradient></defs><circle cx='50' cy='50' r='48' fill='url(%23g)'/><circle cx='50' cy='50' r='38' fill='%23060610'/><text x='50' y='56' font-family='Georgia,serif' font-size='24' font-weight='bold' text-anchor='middle' fill='%23FFD166'>OTC</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Tenor+Sans&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g1:#FFD166;--g2:#F4A717;--g3:#C97B00;
+  --void:#03030A;--dark:#07080F;--surf:#0C0D17;--surf2:#141520;
+  --bdr:rgba(244,167,23,0.12);--txt:#E8E8F0;--dim:#5A5C78;
+  --green:#00C896;--red:#FF5060;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Tenor Sans',sans-serif;background:var(--void);color:var(--txt);min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(244,167,23,0.04),transparent 60%);pointer-events:none;z-index:0;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(3,3,10,0.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--bdr);padding:14px 48px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;letter-spacing:4px;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;}
+.nav-right{display:flex;gap:16px;align-items:center;}
+.rate-badge{font-family:'Fira Code',monospace;font-size:10px;color:var(--green);border:1px solid rgba(0,200,150,0.2);padding:5px 12px;border-radius:99px;}
+
+.hero{text-align:center;padding:60px 24px 40px;position:relative;z-index:1;}
+.hero-tag{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:4px;color:var(--g3);border:1px solid rgba(201,123,0,0.25);padding:6px 16px;display:inline-block;margin-bottom:20px;}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,5vw,60px);font-weight:300;letter-spacing:3px;margin-bottom:12px;}
+.hero h1 span{background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700;}
+.hero p{font-size:14px;color:var(--dim);max-width:500px;margin:0 auto 32px;line-height:1.9;}
+
+.rate-info{display:inline-flex;align-items:center;gap:12px;background:var(--surf);border:1px solid var(--bdr);border-radius:99px;padding:10px 24px;margin-bottom:48px;}
+.rate-info span{font-family:'Fira Code',monospace;font-size:12px;}
+.rate-info .highlight{color:var(--g2);font-weight:700;}
+
+/* TABS */
+.tabs-wrap{max-width:1100px;margin:0 auto;padding:0 24px;}
+.tabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;justify-content:center;}
+.tab{padding:10px 24px;border:1px solid var(--bdr);border-radius:99px;font-size:11px;letter-spacing:2px;cursor:pointer;color:var(--dim);transition:all .2s;background:transparent;}
+.tab.active{background:linear-gradient(135deg,var(--g2),var(--g3));color:#000;border-color:transparent;font-weight:700;}
+.tab:hover:not(.active){border-color:rgba(244,167,23,0.3);color:var(--g2);}
+
+/* PRODUCTS */
+.products{max-width:1100px;margin:0 auto;padding:0 24px 80px;}
+.game-section{display:none;}
+.game-section.active{display:block;}
+.game-title{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--g1);margin-bottom:24px;display:flex;align-items:center;gap:12px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+
+.card{background:var(--surf);border:1px solid var(--bdr);border-radius:16px;padding:24px;transition:all .3s;cursor:pointer;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(244,167,23,0.04),transparent 60%);pointer-events:none;}
+.card:hover{border-color:rgba(244,167,23,0.4);transform:translateY(-4px);box-shadow:0 12px 32px rgba(244,167,23,0.08);}
+.card-game{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+.card-item{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--txt);margin-bottom:4px;}
+.card-rp{font-size:13px;color:var(--dim);margin-bottom:16px;}
+.card-price{display:flex;align-items:center;justify-content:space-between;}
+.card-otc{font-family:'Fira Code',monospace;font-size:20px;font-weight:700;background:linear-gradient(135deg,var(--g1),var(--g2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.card-unit{font-size:10px;letter-spacing:2px;color:var(--dim);}
+.btn-buy{width:100%;padding:12px;background:linear-gradient(135deg,var(--g2),var(--g3));border:none;color:#000;font-size:11px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;margin-top:16px;transition:all .3s;font-family:'Tenor Sans',sans-serif;}
+.btn-buy:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(244,167,23,0.3);}
+
+/* HOW TO ORDER */
+.how-section{background:var(--surf);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);padding:60px 24px;text-align:center;position:relative;z-index:1;}
+.how-title{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--g1);margin-bottom:48px;}
+.steps{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;max-width:900px;margin:0 auto;}
+.step{text-align:center;max-width:200px;}
+.step-num{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--g2),var(--g3));color:#000;font-weight:700;font-size:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.step-title{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--g1);margin-bottom:8px;}
+.step-desc{font-size:12px;color:var(--dim);line-height:1.8;}
+.arrow{font-size:24px;color:var(--bdr);align-self:center;margin-top:-32px;}
+
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999;align-items:center;justify-content:center;padding:20px;}
+.modal.show{display:flex;}
+.modal-box{background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:32px;width:100%;max-width:420px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--g1);margin-bottom:8px;}
+.modal-sub{font-size:13px;color:var(--dim);margin-bottom:24px;line-height:1.8;}
+.modal-item{background:var(--dark);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-bottom:16px;}
+.modal-item-name{font-size:14px;color:var(--txt);margin-bottom:4px;}
+.modal-item-price{font-family:'Fira Code',monospace;font-size:20px;color:var(--g2);}
+.wallet-addr{background:var(--dark);border:1px solid rgba(244,167,23,0.2);border-radius:8px;padding:12px;font-family:'Fira Code',monospace;font-size:11px;color:var(--g1);word-break:break-all;margin-bottom:16px;line-height:1.6;}
+.modal-note{font-size:11px;color:var(--dim);line-height:1.8;margin-bottom:20px;}
+.btn-tele{width:100%;padding:14px;background:linear-gradient(135deg,#0088cc,#006699);border:none;color:#fff;font-size:12px;font-weight:700;letter-spacing:2px;border-radius:10px;cursor:pointer;margin-bottom:8px;font-family:'Tenor Sans',sans-serif;}
+.btn-cancel{width:100%;padding:12px;background:transparent;border:1px solid var(--bdr);color:var(--dim);font-size:11px;border-radius:10px;cursor:pointer;font-family:'Tenor Sans',sans-serif;}
+.btn-cancel:hover{border-color:var(--g2);color:var(--g2);}
+
+footer{position:relative;z-index:1;border-top:1px solid var(--bdr);padding:32px 48px;text-align:center;}
+.fcopy{font-family:'Fira Code',monospace;font-size:10px;color:var(--dim);}
+
+@media(max-width:768px){
+  nav{padding:14px 20px;}
+  .hero{padding:40px 20px 30px;}
+  .tabs-wrap,.products{padding-left:16px;padding-right:16px;}
+  .steps{gap:20px;}
+  .arrow{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">OTC STORE</a>
+<div></div>
+</nav>
+
+<div class="hero" style="position:relative;z-index:1;">
+  <div class="hero-tag">// Tukar OTC ke Voucher Games</div>
+  <h1>Top Up Games<br><span>Pakai OTCoin</span></h1>
+  <p>Mining OTC dan tukarkan dengan voucher game favoritmu. Cepat, mudah, dan terpercaya!</p>
+
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap" style="position:relative;z-index:1;">
+  <div class="tabs">
+    <div class="tab active" onclick="showGame('ml')">⚔️ Mobile Legends</div>
+    <div class="tab" onclick="showGame('ff')">🔥 Free Fire</div>
+    <div class="tab" onclick="showGame('pubg')">🎯 PUBG Mobile</div>
+    <div class="tab" onclick="showGame('roblox')">🎮 Roblox</div>
+    <div class="tab" onclick="showGame('genshin')">✨ Genshin Impact</div>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<div class="products" style="position:relative;z-index:1;">
+
+  <!-- MOBILE LEGENDS -->
+  <div class="game-section active" id="game-ml">
+    <div class="game-title">⚔️ Mobile Legends — Diamond</div>
+    <div class="grid">
+      <div class="card" onclick="order('Mobile Legends', '86 Diamond', 'Rp 20.000', 1333)">
+        <div class="card-game">Mobile Legends</div>
+        <div class="card-item">86 💎 Diamond</div>
+        <div class="card-rp">≈ Rp 20.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">1.333</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Mobile Legends', '172 Diamond', 'Rp 39.000', 2600)">
+        <div class="card-game">Mobile Legends</div>
+        <div class="card-item">172 💎 Diamond</div>
+        <div class="card-rp">≈ Rp 39.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">2.600</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Mobile Legends', '257 Diamond', 'Rp 56.000', 3733)">
+        <div class="card-game">Mobile Legends</div>
+        <div class="card-item">257 💎 Diamond</div>
+        <div class="card-rp">≈ Rp 56.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">3.733</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Mobile Legends', '500 Diamond', 'Rp 109.000', 7267)">
+        <div class="card-game">Mobile Legends</div>
+        <div class="card-item">500 💎 Diamond</div>
+        <div class="card-rp">≈ Rp 109.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">7.267</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Mobile Legends', '1000 Diamond', 'Rp 219.000', 14600)">
+        <div class="card-game">Mobile Legends</div>
+        <div class="card-item">1000 💎 Diamond</div>
+        <div class="card-rp">≈ Rp 219.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">14.600</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FREE FIRE -->
+  <div class="game-section" id="game-ff">
+    <div class="game-title">🔥 Free Fire — Diamond</div>
+    <div class="grid">
+      <div class="card" onclick="order('Free Fire', '70 Diamond', 'Rp 15.000', 1000)">
+        <div class="card-game">Free Fire</div>
+        <div class="card-item">70 💎 Diamond</div>
+        <div class="card-rp">≈ Rp 15.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">1.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Free Fire', '140 Diamond', 'Rp 30.000', 2000)">
+        <div class="card-game">Free Fire</div>
+        <div class="card-item">140 💎 Diamond</div>
+        <div class="card-rp">≈ Rp 30.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">2.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Free Fire', '355 Diamond', 'Rp 75.000', 5000)">
+        <div class="card-game">Free Fire</div>
+        <div class="card-item">355 💎 Diamond</div>
+        <div class="card-rp">≈ Rp 75.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">5.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Free Fire', '720 Diamond', 'Rp 150.000', 10000)">
+        <div class="card-game">Free Fire</div>
+        <div class="card-item">720 💎 Diamond</div>
+        <div class="card-rp">≈ Rp 150.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">10.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUBG -->
+  <div class="game-section" id="game-pubg">
+    <div class="game-title">🎯 PUBG Mobile — UC</div>
+    <div class="grid">
+      <div class="card" onclick="order('PUBG Mobile', '60 UC', 'Rp 15.000', 1000)">
+        <div class="card-game">PUBG Mobile</div>
+        <div class="card-item">60 🪙 UC</div>
+        <div class="card-rp">≈ Rp 15.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">1.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('PUBG Mobile', '325 UC', 'Rp 75.000', 5000)">
+        <div class="card-game">PUBG Mobile</div>
+        <div class="card-item">325 🪙 UC</div>
+        <div class="card-rp">≈ Rp 75.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">5.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('PUBG Mobile', '660 UC', 'Rp 150.000', 10000)">
+        <div class="card-game">PUBG Mobile</div>
+        <div class="card-item">660 🪙 UC</div>
+        <div class="card-rp">≈ Rp 150.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">10.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('PUBG Mobile', '1800 UC', 'Rp 400.000', 26667)">
+        <div class="card-game">PUBG Mobile</div>
+        <div class="card-item">1800 🪙 UC</div>
+        <div class="card-rp">≈ Rp 400.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">26.667</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROBLOX -->
+  <div class="game-section" id="game-roblox">
+    <div class="game-title">🎮 Roblox — Robux</div>
+    <div class="grid">
+      <div class="card" onclick="order('Roblox', '80 Robux', 'Rp 15.000', 1000)">
+        <div class="card-game">Roblox</div>
+        <div class="card-item">80 🟡 Robux</div>
+        <div class="card-rp">≈ Rp 15.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">1.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Roblox', '400 Robux', 'Rp 75.000', 5000)">
+        <div class="card-game">Roblox</div>
+        <div class="card-item">400 🟡 Robux</div>
+        <div class="card-rp">≈ Rp 75.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">5.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Roblox', '800 Robux', 'Rp 150.000', 10000)">
+        <div class="card-game">Roblox</div>
+        <div class="card-item">800 🟡 Robux</div>
+        <div class="card-rp">≈ Rp 150.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">10.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENSHIN -->
+  <div class="game-section" id="game-genshin">
+    <div class="game-title">✨ Genshin Impact — Genesis Crystal</div>
+    <div class="grid">
+      <div class="card" onclick="order('Genshin Impact', '60 Genesis Crystal', 'Rp 15.000', 1000)">
+        <div class="card-game">Genshin Impact</div>
+        <div class="card-item">60 💠 Genesis Crystal</div>
+        <div class="card-rp">≈ Rp 15.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">1.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Genshin Impact', '300 Genesis Crystal', 'Rp 75.000', 5000)">
+        <div class="card-game">Genshin Impact</div>
+        <div class="card-item">300 💠 Genesis Crystal</div>
+        <div class="card-rp">≈ Rp 75.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">5.000</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+      <div class="card" onclick="order('Genshin Impact', '980 Genesis Crystal', 'Rp 239.000', 15933)">
+        <div class="card-game">Genshin Impact</div>
+        <div class="card-item">980 💠 Genesis Crystal</div>
+        <div class="card-rp">≈ Rp 239.000</div>
+        <div class="card-price">
+          <div><div class="card-otc">15.933</div><div class="card-unit">OTC</div></div>
+        </div>
+        <button class="btn-buy">Beli Sekarang →</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- HOW TO ORDER -->
+<div class="how-section">
+  <div class="how-title">Cara Order</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Pilih Voucher</div>
+      <div class="step-desc">Pilih game dan jumlah voucher yang kamu inginkan</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Kirim OTC</div>
+      <div class="step-desc">Kirim OTC ke wallet kami sesuai harga yang tertera</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Konfirmasi</div>
+      <div class="step-desc">Screenshot bukti transfer dan kirim ke Telegram kami</div>
+    </div>
+    <div class="arrow">→</div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">Terima Voucher</div>
+      <div class="step-desc">Voucher dikirim dalam 5-15 menit setelah konfirmasi</div>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div class="modal" id="orderModal">
+  <div class="modal-box">
+    <div class="modal-title">🛒 Order Voucher</div>
+    <div class="modal-sub">Kirim OTC ke wallet berikut, lalu konfirmasi via Telegram</div>
+    <div class="modal-item">
+      <div class="modal-item-name" id="modalItem">-</div>
+      <div class="modal-item-price"><span id="modalOTC">-</span> OTC</div>
+    </div>
+    <div style="font-size:11px;letter-spacing:2px;color:var(--dim);margin-bottom:8px;text-transform:uppercase;">Kirim OTC ke Wallet:</div>
+    <div class="wallet-addr" id="modalWallet">10e49956db6543945b3722256a0614a33faf55e62</div>
+    <div class="modal-note">
+      ⚠️ Pastikan kamu mengirim OTC yang tepat.<br>
+      Setelah transfer, kirim screenshot + ID game kamu ke Telegram kami.<br>
+      Voucher akan dikirim dalam 5-15 menit.
+    </div>
+    <button class="btn-tele" onclick="openTelegram()">📱 Konfirmasi via Telegram</button>
+    <button class="btn-cancel" onclick="closeModal()">Batal</button>
+  </div>
+</div>
+
+<footer>
+  <div class="fcopy">© 2025 OTC Store — OTCoin Foundation | Powered by OTCoin Blockchain</div>
+</footer>
+
+<script>
+const WALLET = '10e49956db6543945b3722256a0614a33faf55e62';
+const TELEGRAM = 'https://t.me/+MGYkB80BhlwzNGQ1';
+
+function showGame(game){
+  document.querySelectorAll('.game-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('game-'+game).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function order(game, item, rp, otc){
+  document.getElementById('modalItem').textContent = game + ' — ' + item + ' (' + rp + ')';
+  document.getElementById('modalOTC').textContent = otc.toLocaleString('id-ID');
+  document.getElementById('modalWallet').textContent = WALLET;
+  document.getElementById('orderModal').classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('orderModal').classList.remove('show');
+}
+
+function openTelegram(){
+  window.open(TELEGRAM, '_blank');
+}
+
+document.getElementById('orderModal').addEventListener('click', function(e){
+  if(e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
